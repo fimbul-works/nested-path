@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { deleteNestedProperty, getNestedProperty, hasNestedProperty, setNestedProperty } from "./index";
+import { hasNestedProperty } from "./index";
+
+const slashSeparator = (path: string) => path.split("/");
 
 describe("hasNestedProperty", () => {
   const testObj = {
@@ -52,5 +54,33 @@ describe("hasNestedProperty", () => {
 
   it("should handle single character keys", () => {
     expect(hasNestedProperty({ a: { b: 1 } }, "a.b")).toBe(true);
+  });
+
+  it("should return true for existing array indices", () => {
+    const obj = { user: { permissions: [{ token: "abc" }, { token: "def" }] } };
+    expect(hasNestedProperty(obj, "user.permissions.0")).toBe(true);
+    expect(hasNestedProperty(obj, "user.permissions.0.token")).toBe(true);
+    expect(hasNestedProperty(obj, "user.permissions.1.token")).toBe(true);
+  });
+
+  it("should return false for out-of-bounds array indices", () => {
+    const obj = { items: [1, 2, 3] };
+    expect(hasNestedProperty(obj, "items.5")).toBe(false);
+  });
+
+  it("should return false when path continues past a non-object array element", () => {
+    const obj = { items: [1, 2, 3] };
+    expect(hasNestedProperty(obj, "items.0.nested")).toBe(false);
+  });
+
+  it("should accept a root array", () => {
+    expect(hasNestedProperty([1, 2, 3], "0")).toBe(true);
+    expect(hasNestedProperty([1, 2, 3], "5")).toBe(false);
+    expect(hasNestedProperty([{ token: "abc" }], "0.token")).toBe(true);
+  });
+
+  it("should use a custom separator", () => {
+    expect(hasNestedProperty(testObj, "b/d/e", slashSeparator)).toBe(true);
+    expect(hasNestedProperty(testObj, "b/d/nonexistent", slashSeparator)).toBe(false);
   });
 });

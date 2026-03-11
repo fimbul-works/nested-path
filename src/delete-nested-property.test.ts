@@ -33,7 +33,7 @@ describe("deleteNestedProperty", () => {
 
     expect(() => {
       deleteNestedProperty(testObj, "a.b");
-    }).toThrow("Key 'b' in path 'a.b' is not an object");
+    }).toThrow("Key 'b' in path 'a.b' not found");
   });
 
   it("should throw error when final key is not an object", () => {
@@ -45,7 +45,7 @@ describe("deleteNestedProperty", () => {
 
     expect(() => {
       deleteNestedProperty(testObj, "a.b.c");
-    }).toThrow("Key 'c' in path 'a.b.c' is not an object");
+    }).toThrow("Key 'c' in path 'a.b.c' not found");
   });
 
   it("should throw error when trying to delete non-existent property", () => {
@@ -58,6 +58,19 @@ describe("deleteNestedProperty", () => {
     expect(() => {
       deleteNestedProperty(testObj, "a.nonexistent");
     }).toThrow("Cannot delete 'nonexistent' in path 'a.nonexistent'");
+  });
+
+  it("should delete properties through array indices", () => {
+    const obj = { user: { permissions: [{ token: "abc", role: "admin" }] } };
+    deleteNestedProperty(obj, "user.permissions.0.token");
+    expect((obj.user.permissions[0] as any).token).toBe(undefined);
+    expect(obj.user.permissions[0].role).toBe("admin");
+  });
+
+  it("should delete array elements using splice", () => {
+    const obj = { items: [10, 20, 30] };
+    deleteNestedProperty(obj, "items.1");
+    expect(obj.items).toEqual([10, 30]);
   });
 
   it("should handle deep nesting", () => {

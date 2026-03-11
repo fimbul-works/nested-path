@@ -46,7 +46,7 @@ describe("setNestedProperty", () => {
 
     expect(() => {
       setNestedProperty(testObj, "a.b", "value");
-    }).toThrow("Key 'b' in path 'a.b' is not an object");
+    }).toThrow("Key 'b' in path 'a.b' not found");
   });
 
   it("should throw error when final key is not an object", () => {
@@ -58,7 +58,7 @@ describe("setNestedProperty", () => {
 
     expect(() => {
       setNestedProperty(testObj, "a.b.c", "value");
-    }).toThrow("Key 'c' in path 'a.b.c' is not an object");
+    }).toThrow("Key 'c' in path 'a.b.c' not found");
   });
 
   it("should throw error when trying to set non-existent property", () => {
@@ -101,6 +101,19 @@ describe("setNestedProperty", () => {
 
     setNestedProperty(testObj, "a.b.c.d.e", "updated");
     expect(testObj.a.b.c.d.e).toBe("updated");
+  });
+
+  it("should set values through array indices", () => {
+    const obj = { user: { permissions: [{ token: "abc" }, { token: "def" }] } };
+    setNestedProperty(obj, "user.permissions.0.token", "xyz");
+    expect(obj.user.permissions[0].token).toBe("xyz");
+    expect(obj.user.permissions[1].token).toBe("def");
+  });
+
+  it("should set array elements directly", () => {
+    const obj = { items: [10, 20, 30] };
+    setNestedProperty(obj, "items.1", 99);
+    expect(obj.items[1]).toBe(99);
   });
 
   it("should maintain object references", () => {

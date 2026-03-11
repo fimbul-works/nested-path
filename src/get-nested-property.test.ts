@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { getNestedProperty } from "./index";
 
+const slashSeparator = (path: string) => path.split("/");
+
 describe("getNestedProperty", () => {
   const testObj = {
     a: 1,
@@ -57,5 +59,37 @@ describe("getNestedProperty", () => {
   it("should handle complex default values", () => {
     const defaultObj = { complex: "object" };
     expect(getNestedProperty(testObj, "nonexistent", defaultObj)).toBe(defaultObj);
+  });
+
+  it("should get values through array indices", () => {
+    const obj = { user: { permissions: [{ token: "abc" }, { token: "def" }] } };
+    expect(getNestedProperty(obj, "user.permissions.0.token")).toBe("abc");
+    expect(getNestedProperty(obj, "user.permissions.1.token")).toBe("def");
+  });
+
+  it("should get array elements directly", () => {
+    const obj = { items: [10, 20, 30] };
+    expect(getNestedProperty(obj, "items.0")).toBe(10);
+    expect(getNestedProperty(obj, "items.2")).toBe(30);
+  });
+
+  it("should return default value for out-of-bounds array index", () => {
+    const obj = { items: [1, 2, 3] };
+    expect(getNestedProperty(obj, "items.5", "missing")).toBe("missing");
+  });
+
+  it("should accept a root array", () => {
+    expect(getNestedProperty([10, 20, 30], "1")).toBe(20);
+    expect(getNestedProperty([{ name: "Alice" }], "0.name")).toBe("Alice");
+  });
+
+  it("should return default value for missing index in root array", () => {
+    expect(getNestedProperty([1, 2, 3], "9", "missing")).toBe("missing");
+  });
+
+  it("should use a custom separator", () => {
+    expect(getNestedProperty(testObj, "b/c", undefined, slashSeparator)).toBe("nested");
+    expect(getNestedProperty(testObj, "b/d/e", undefined, slashSeparator)).toEqual([1, 2, 3]);
+    expect(getNestedProperty(testObj, "missing/key", "default", slashSeparator)).toBe("default");
   });
 });

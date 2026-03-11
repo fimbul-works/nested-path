@@ -1,25 +1,26 @@
-import type { PathSeparatorFunction } from "./types.js";
-import { dotSeparator, isObj } from "./util.js";
+import type { Container, PathSeparatorFunction } from "./types.js";
+import { dotSeparator, isObjOrArray } from "./util.js";
 
 /**
- * Checks if a key exists in an object using dot notation.
+ * Checks if a key exists in an object or array using dot notation.
  *
- * @template {Record<string, unknown>} T - Type of object
- * @param {T} obj - The object containing variables.
- * @param {string} path - The variable name using dot notation.
+ * @template {Container} T - Type of object or array
+ * @template {keyof T & string} K - Key indexing T
+ * @param {T} input - The object or array to check.
+ * @param {string} path - The path using the configured separator notation.
  * @param {PathSeparatorFunction} [separator=dotSeparator] - Function that splits the path into individual keys (default: dotSeparator)
- * @returns {booelan} `true` if the key exists in the object, and `false` if does not.
+ * @returns {boolean} `true` if the key exists, `false` otherwise.
  */
-export function hasNestedProperty<T extends Record<string, unknown> = Record<string, unknown>>(
-  obj: T,
+export function hasNestedProperty<T extends Container = Container, K extends keyof T & string = keyof T & string>(
+  input: T,
   path: string,
   separator: PathSeparatorFunction = dotSeparator,
 ): boolean {
-  const pathKeys = separator(path);
-  let current: T = obj;
+  const pathKeys = separator(path) as K[];
+  let current = input;
 
   for (const key of pathKeys) {
-    if (!isObj(current) || !(key in current)) {
+    if (!isObjOrArray(current) || !(key in current)) {
       return false;
     }
     current = current[key] as T;
