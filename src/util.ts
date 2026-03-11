@@ -17,8 +17,15 @@ export const isObj = <T extends object>(v: any): v is T => typeof v === "object"
 export const isObjOrArray = <T extends object | any[]>(v: any): v is T => typeof v === "object" && v !== null;
 
 /**
- * Split a string using a dot.
+ * Split a string using dots.
  * @param {string} path - Path to split into parts
  * @returns {string[]} The path parts
  */
 export const dotSeparator: PathSeparatorFunction = (path: string): string[] => path.split(".");
+
+/**
+ * Split a string using slashes.
+ * @param {string} path - Path to split into parts
+ * @returns {string[]} The path parts
+ */
+export const slashSeparator: PathSeparatorFunction = (path: string): string[] => path.split("/");

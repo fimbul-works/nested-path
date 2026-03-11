@@ -12,16 +12,17 @@ import { dotSeparator, isObjOrArray } from "./util.js";
  * @param {V} value - The new value to set
  * @param {PathSeparatorFunction} [separator=dotSeparator] - Function that splits the path into individual keys (default: dotSeparator)
  */
-export function setNestedProperty<
-  V = any,
-  T extends Container = Container,
-  K extends keyof T & string = keyof T & string,
->(input: T, path: string, value: V, separator: PathSeparatorFunction = dotSeparator): void {
-  const keys = separator(path) as K[];
-  const lastKey = keys.pop() as K;
+export function setAtPath<V = any, T extends Container = Container, K extends keyof T & string = keyof T & string>(
+  input: T,
+  path: string,
+  value: V,
+  separator: PathSeparatorFunction = dotSeparator,
+): void {
+  const pathKeys = separator(path) as K[];
+  const lastKey = pathKeys.pop() as K;
   let current = input;
 
-  for (const key of keys) {
+  for (const key of pathKeys) {
     if (!isObjOrArray<T>(current)) {
       throw new Error(`Key '${key}' in path '${path}' is not an object`);
     }
@@ -30,10 +31,6 @@ export function setNestedProperty<
 
   if (!isObjOrArray<T>(current)) {
     throw new Error(`Key '${lastKey}' in path '${path}' not found`);
-  }
-
-  if (current[lastKey] === undefined) {
-    throw new Error(`Cannot update '${lastKey}' in path '${path}'`);
   }
 
   current[lastKey] = value as T[K];

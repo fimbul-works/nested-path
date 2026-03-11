@@ -12,7 +12,7 @@ import { dotSeparator } from "./util.js";
  * @param {PathSeparatorFunction} [separator=dotSeparator] - Function that splits the path into individual keys (default: dotSeparator)
  * @returns {V} The value at the path, or `defaultValue` if not found.
  */
-export function getNestedProperty<V = any, T extends Container = Container>(
+export function getAtPath<V = any, T extends Container = Container>(
   input: T,
   path: string,
   defaultValue?: V,

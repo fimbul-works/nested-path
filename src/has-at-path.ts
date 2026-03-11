@@ -11,7 +11,7 @@ import { dotSeparator, isObjOrArray } from "./util.js";
  * @param {PathSeparatorFunction} [separator=dotSeparator] - Function that splits the path into individual keys (default: dotSeparator)
  * @returns {boolean} `true` if the key exists, `false` otherwise.
  */
-export function hasNestedProperty<T extends Container = Container, K extends keyof T & string = keyof T & string>(
+export function hasAtPath<T extends Container = Container, K extends keyof T & string = keyof T & string>(
   input: T,
   path: string,
   separator: PathSeparatorFunction = dotSeparator,

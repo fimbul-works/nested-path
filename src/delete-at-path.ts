@@ -10,16 +10,16 @@ import { dotSeparator, isObjOrArray } from "./util.js";
  * @param {string} path - The variable name using dot notation.
  * @param {PathSeparatorFunction} [separator=dotSeparator] - Function that splits the path into individual keys (default: dotSeparator)
  */
-export function deleteNestedProperty<T extends Container = Container, K extends keyof T & string = keyof T & string>(
+export function deleteAtPath<T extends Container = Container, K extends keyof T & string = keyof T & string>(
   input: T,
   path: string,
   separator: PathSeparatorFunction = dotSeparator,
 ): void {
-  const keys = separator(path) as K[];
-  const lastKey = keys.pop() as K;
+  const pathKeys = separator(path) as K[];
+  const lastKey = pathKeys.pop() as K;
   let current = input;
 
-  for (const key of keys) {
+  for (const key of pathKeys) {
     if (!isObjOrArray<T>(current)) {
       throw new Error(`Key '${key}' in path '${path}' not found`);
     }
@@ -34,9 +34,8 @@ export function deleteNestedProperty<T extends Container = Container, K extends 
     throw new Error(`Cannot delete '${lastKey}' in path '${path}'`);
   }
 
-  const numKey = Number(lastKey);
-  if (Array.isArray(current) && numKey) {
-    current.splice(numKey, 1);
+  if (Array.isArray(current) && /^\d+$/.test(lastKey)) {
+    current.splice(Number(lastKey), 1);
   } else {
     delete current[lastKey];
   }

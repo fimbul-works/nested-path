@@ -1,20 +1,29 @@
 {
-  "name": "@fimbul-works/nested",
-  "description": "",
+  "name": "@fimbul-works/nested-path",
+  "description": "Small set of TypeScript utilities for reading, writing, checking, and deleting values at arbitrary depths inside objects and arrays",
   "version": "1.0.0",
   "type": "module",
   "private": false,
   "license": "MIT",
   "author": "FimbulWorks <contact@fimbul.works>",
-  "homepage": "https://github.com/fimbul-works/nested#readme",
+  "homepage": "https://github.com/fimbul-works/nested-path#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fimbul-works/nested.git"
+    "url": "git+https://github.com/fimbul-works/nested-path.git"
   },
   "bugs": {
-    "url": "https://github.com/fimbul-works/nested/issues"
+    "url": "https://github.com/fimbul-works/nested-path/issues"
   },
-  "keywords": ["nested-property", "object", "nested"],
+  "keywords": [
+    "nested",
+    "nested-property",
+    "deep-property",
+    "object-path",
+    "array-path",
+    "path-traversal",
+    "nested-object",
+    "typescript"
+  ],
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
   "types": "./dist/esm/index.d.ts",
