@@ -12,8 +12,7 @@
         "noExplicitAny": "off"
       },
       "style": {
-        "useSingleVarDeclarator": "off",
-        "noCommaOperator": "off"
+        "useSingleVarDeclarator": "off"
       }
     }
   }

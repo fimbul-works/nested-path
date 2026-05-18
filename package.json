@@ -1,7 +1,7 @@
 {
   "name": "@fimbul-works/nested-path",
   "description": "Small set of TypeScript utilities for reading, writing, checking, and deleting values at arbitrary depths inside objects and arrays",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "private": false,
   "license": "MIT",
@@ -42,11 +42,13 @@
   "sideEffects": false,
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "pnpm clean && pnpm build:esm && pnpm build:cjs",
+    "clean:bundles": "rm -rf bundles",
+    "build": "pnpm clean && pnpm build:esm && pnpm build:cjs && pnpm build:docs",
     "build:esm": "tsc -p tsconfig.json",
     "build:cjs": "tsc -p tsconfig.cjs.json && echo '{\"type\":\"commonjs\"}' > dist/cjs/package.json",
-    "build:bundles": "rm -rf bundles && tsdown",
+    "build:bundles": "pnpm clean:bundles && tsdown",
     "build:all": "pnpm build && pnpm build:bundles && pnpm sizes",
+    "build:docs": "typedoc",
     "format": "npx biome format --write src",
     "test": "vitest",
     "sizes": "bundle-size",
@@ -56,6 +58,8 @@
     "@biomejs/biome": "^2.4.15",
     "@fimbul-works/bundle-size": "link:../bundle-size",
     "tsdown": "^0.22.0",
+    "typedoc": "^0.28.19",
+    "typedoc-plugin-markdown": "^4.11.0",
     "typescript": "^6.0.3",
     "vitest": "^4.1.6"
   }
