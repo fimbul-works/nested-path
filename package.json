@@ -1,7 +1,7 @@
 {
   "name": "@fimbul-works/nested-path",
-  "description": "Small set of TypeScript utilities for reading, writing, checking, and deleting values at arbitrary depths inside objects and arrays",
-  "version": "1.0.1",
+  "description": "Type-safe utilities to get, set, check, and delete nested object and array values with inferred path types and customizable string delimiters",
+  "version": "2.0.0",
   "type": "module",
   "private": false,
   "license": "MIT",
@@ -15,14 +15,18 @@
     "url": "https://github.com/fimbul-works/nested-path/issues"
   },
   "keywords": [
+    "typescript",
+    "type-safe",
+    "type-inference",
     "nested",
     "nested-property",
     "deep-property",
     "object-path",
     "array-path",
+    "dot-notation",
     "path-traversal",
-    "nested-object",
-    "typescript"
+    "deep-get",
+    "deep-set"
   ],
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -50,17 +54,25 @@
     "build:all": "pnpm build && pnpm build:bundles && pnpm sizes",
     "build:docs": "typedoc",
     "format": "npx biome format --write src",
-    "test": "vitest",
+    "test": "pnpm test:types && vitest",
     "sizes": "bundle-size",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "test:types": "tsc --ignoreConfig --noEmit --types node --strict --skipLibCheck --noUncheckedIndexedAccess --exactOptionalPropertyTypes --target ESNext --module ESNext --moduleResolution Bundler src/type-safety.test.ts src/config.integration.test.ts src/intellisense.integration.test.ts src/readme.test.ts && tsc -p examples/tsconfig.json",
+    "test:run": "pnpm test:types && vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json && pnpm test:types",
+    "typecheck:examples": "tsc -p examples/tsconfig.json"
+  },
+  "dependencies": {
+    "@fimbul-works/hvat": "^1.3.2"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.15",
-    "@fimbul-works/bundle-size": "link:../bundle-size",
-    "tsdown": "^0.22.0",
-    "typedoc": "^0.28.19",
-    "typedoc-plugin-markdown": "^4.11.0",
+    "@biomejs/biome": "^2.6.4",
+    "@fimbul-works/bundle-size": "^2.0.0",
+    "@types/node": "^26.6.6",
+    "tsdown": "^0.23.5",
+    "typedoc": "^0.28.20",
+    "typedoc-plugin-markdown": "^4.14.1",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.6"
+    "vitest": "^5.1.0"
   }
 }

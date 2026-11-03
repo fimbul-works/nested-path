@@ -1,3 +1,5 @@
 allowBuilds:
   '@biomejs/biome': true
   esbuild: false
+minimumReleaseAgeExclude:
+  - tsdown@0.23.5

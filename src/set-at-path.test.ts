@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { setAtPath } from "./set-at-path";
+import { setAtPath as checkedSetAtPath } from "./set-at-path";
 
-const slashSeparator = (path: string) => path.split("/");
+// Exercise unchecked JavaScript inputs against the same public implementation.
+const setAtPath = checkedSetAtPath as (input: object, path: string, value: unknown, separator?: string) => boolean;
+
+import { slashSeparator } from "./separator";
 
 describe("setAtPath", () => {
   // --- basic object mutations ---
@@ -47,17 +50,17 @@ describe("setAtPath", () => {
   });
 
   describe("error states", () => {
-    it("should throw when an intermediate key resolves to a non-traversable value", () => {
-      // path has 3+ segments; non-traversable value reached mid-traversal
-      expect(() => setAtPath({ a: "string" }, "a.b.c", "value")).toThrow("Key 'b' in path 'a.b.c' is not an object");
-      expect(() => setAtPath({ a: 42 }, "a.b.c", "value")).toThrow("Key 'b' in path 'a.b.c' is not an object");
-      expect(() => setAtPath({ a: () => {} }, "a.b.c", "value")).toThrow("Key 'b' in path 'a.b.c' is not an object");
+    it("should return false when an intermediate key resolves to a non-traversable value", () => {
+      // Non-traversable values make the mutation fail.
+      expect(setAtPath({ a: "string" }, "a.b.c", "value")).toBe(false);
+      expect(setAtPath({ a: 42 }, "a.b.c", "value")).toBe(false);
+      expect(setAtPath({ a: () => {} }, "a.b.c", "value")).toBe(false);
     });
 
-    it("should throw when the final container is a non-traversable value", () => {
+    it("should return false when the final container is a non-traversable value", () => {
       // path has 2 segments; non-traversable value found after last traversal step
-      expect(() => setAtPath({ a: "string" }, "a.b", "value")).toThrow("Key 'b' in path 'a.b' not found");
-      expect(() => setAtPath({ a: 42 }, "a.b", "value")).toThrow("Key 'b' in path 'a.b' not found");
+      expect(setAtPath({ a: "string" }, "a.b", "value")).toBe(false);
+      expect(setAtPath({ a: 42 }, "a.b", "value")).toBe(false);
     });
 
     it("should create a new key when it does not exist in the container", () => {
@@ -77,8 +80,8 @@ describe("setAtPath", () => {
     it("should traverse through an array index to set a nested property", () => {
       const obj = { user: { permissions: [{ token: "abc" }, { token: "def" }] } };
       setAtPath(obj, "user.permissions.0.token", "xyz");
-      expect(obj.user.permissions[0].token).toBe("xyz");
-      expect(obj.user.permissions[1].token).toBe("def");
+      expect(obj.user.permissions[0]!.token).toBe("xyz");
+      expect(obj.user.permissions[1]!.token).toBe("def");
     });
 
     it("should set an array element directly from an object property", () => {
@@ -112,7 +115,7 @@ describe("setAtPath", () => {
     it("should use a custom separator with array traversal through an object", () => {
       const obj = { user: { permissions: [{ token: "abc" }, { token: "def" }] } };
       setAtPath(obj, "user/permissions/0/token", "xyz", slashSeparator);
-      expect(obj.user.permissions[0].token).toBe("xyz");
+      expect(obj.user.permissions[0]!.token).toBe("xyz");
     });
 
     it("should use a custom separator to set a single-level array element", () => {
@@ -126,5 +129,40 @@ describe("setAtPath", () => {
       setAtPath(arr, "2", 99, slashSeparator);
       expect(arr[2]).toBe(99);
     });
+  });
+});
+
+describe("setAtPath success results", () => {
+  it("returns true for assignments, including unchanged values and new keys", () => {
+    const input = { value: 1, nested: {} };
+    expect(setAtPath(input, "value", 2)).toBe(true);
+    expect(setAtPath(input, "value", 2)).toBe(true);
+    expect(setAtPath(input, "nested.name", undefined)).toBe(true);
+    expect(Object.hasOwn(input.nested, "name")).toBe(true);
+    const array: number[] = [];
+    expect(setAtPath(array, "2", 42)).toBe(true);
+    expect(array[2]).toBe(42);
+  });
+
+  it("returns false for missing ancestors, rejected assignments, and empty parser results", () => {
+    const input = { nested: null };
+    expect(setAtPath(input, "nested.value", 1)).toBe(false);
+    expect(setAtPath(input, "missing.value", 1)).toBe(false);
+    expect(input).toEqual({ nested: null });
+    expect(setAtPath(Object.freeze({ value: 1 }), "value", 2)).toBe(false);
+    expect(setAtPath(Object.preventExtensions({}), "new", 1)).toBe(false);
+    // @ts-expect-error
+    expect(() => setAtPath({}, "", 1, () => [])).toThrow(TypeError);
+    expect(
+      setAtPath(
+        {
+          set value(_value: unknown) {
+            throw new Error("rejected");
+          },
+        },
+        "value",
+        1,
+      ),
+    ).toBe(false);
   });
 });

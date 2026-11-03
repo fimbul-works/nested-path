@@ -1,7 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { getAtPath } from "./get-at-path";
+import { getAtPath as checkedGetAtPath } from "./get-at-path";
 
-const slashSeparator = (path: string) => path.split("/");
+// Exercise unchecked JavaScript inputs against the same public implementation.
+const getAtPath = checkedGetAtPath as (
+  input: object,
+  path: string,
+  defaultValue?: unknown,
+  separator?: string,
+) => unknown;
+
+import { slashSeparator } from "./separator";
 
 describe("getAtPath", () => {
   const testObj = {

@@ -37,11 +37,16 @@
   "hideBreadcrumbs": false,
   "hidePageHeader": true,
 
+  "intentionallyNotExported": [
+    "ValidPath", "CanDelete", "IsUnion", "IsLiteralString", "Completions",
+    "SuggestedPaths", "ReadKey", "WriteFunctions"
+  ],
   "readme": "none",
   "cleanOutputDir": true,
   "indexFormat": "table",
   "parametersFormat": "table",
   "interfacePropertiesFormat": "table",
   "classPropertiesFormat": "table",
-  "typeDeclarationFormat": "table"
+  "typeDeclarationFormat": "table",
+  "disableSources": true
 }

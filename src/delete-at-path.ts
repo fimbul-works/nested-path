@@ -1,44 +1,79 @@
-import { dotSeparator } from "./separator.js";
-import type { Container, PathSeparatorFunction } from "./types.js";
-import { isNested } from "./util.js";
+import { isArr, isUndef } from "@fimbul-works/hvat";
+import { createSeparator, dotSeparator } from "./separator.js";
+import type { Container, DeletablePath, PathArgument, LiteralDelimiter } from "./types.js";
+import { canSplice, isNested } from "./util.js";
 
 /**
- * Delete a nested property.
+ * Delete an optional property or splice an array using a literal string delimiter.
  *
- * @template {Container} T - Type of object or array
- * @template {keyof T & string} K - Key indexing T
+ * Mutates the input in place. Required properties, readonly destinations, and
+ * tuple element removal are rejected at compile time. Ordinary array indices
+ * are removed with the built-in splice, shifting later elements to the left.
+ * Affected slots are checked before mutation; blocked or accessor-backed slots
+ * return false without shifting ordinary arrays.
  *
- * @param {T} input - The context object or array containing variables
- * @param {string} path - The variable name using dot notation
- * @param {PathSeparatorFunction} [separator=dotSeparator] - Function that splits the path into individual keys (default: dotSeparator)
+ * @typeParam T - Type of the input object or array.
+ * @typeParam P - Literal path of a mutable optional property, dictionary entry, or ordinary array index.
+ * @typeParam D - Literal string delimiter used to interpret the path.
+ * @param input - Object or array to mutate.
+ * @param path - Checked deletable path interpreted using the supplied string delimiter.
+ * @param separator - Nonempty literal string delimiter, such as "/" or "::".
+ * @returns `true` if the mutation succeeds; `false` if the path cannot be traversed or the mutation fails.
+ * @throws {TypeError} If the separator is not a nonempty string.
  */
-export function deleteAtPath<T extends Container = Container, K extends keyof T & string = keyof T & string>(
+export function deleteAtPath<T extends Container, const P extends string, const D extends string>(
   input: T,
-  path: string,
-  separator: PathSeparatorFunction = dotSeparator,
-): void {
-  const pathKeys = separator(path) as K[];
-  const lastKey = pathKeys.pop() as K;
-  let current = input;
+  path: PathArgument<NoInfer<T>, P, NoInfer<D>> & NoInfer<DeletablePath<T, P, D>>,
+  separator: D & LiteralDelimiter<NoInfer<D>>,
+): boolean;
+/**
+ * Delete a mutable optional property or splice an ordinary array at a dot-separated path.
+ *
+ * @typeParam T - Type of the input object or array.
+ * @typeParam P - Literal dot-separated deletable path.
+ * @param input - Object or array to mutate.
+ * @param path - Checked deletable path using dot notation.
+ * @param separator - Omit or pass undefined to use the default dot separator.
+ * @returns `true` if the mutation succeeds; `false` if the path cannot be traversed or the mutation fails.
+ * @throws {TypeError} If the separator is not a nonempty string.
+ */
+export function deleteAtPath<T extends Container, const P extends string>(
+  input: T,
+  path: PathArgument<NoInfer<T>, P> & NoInfer<DeletablePath<T, P>>,
+  separator?: undefined,
+): boolean;
+export function deleteAtPath(input: Container, path: string, separator: string = dotSeparator): boolean {
+  const parse = createSeparator(separator);
 
-  for (const key of pathKeys) {
-    if (!isNested<T>(current)) {
-      throw new Error(`Key '${key}' in path '${path}' not found`);
+  try {
+    const keys = parse(path);
+    const lastKey = keys.pop();
+    if (isUndef(lastKey)) {
+      return false;
     }
-    current = current[key] as T;
-  }
 
-  if (!isNested<T>(current)) {
-    throw new Error(`Key '${lastKey}' in path '${path}' not found`);
-  }
+    let current: unknown = input;
+    for (const key of keys) {
+      if (!isNested(current)) {
+        return false;
+      }
+      current = current[key];
+    }
 
-  if (current[lastKey] === undefined) {
-    throw new Error(`Cannot delete '${lastKey}' in path '${path}'`);
-  }
+    if (!isNested(current) || !Reflect.getOwnPropertyDescriptor(current, lastKey)) {
+      return false;
+    }
 
-  if (Array.isArray(current) && /^\d+$/.test(lastKey)) {
-    current.splice(Number(lastKey), 1);
-  } else {
-    delete current[lastKey];
+    if (isArr(current)) {
+      const index = Number(lastKey);
+      if (Number.isInteger(index) && index >= 0 && index < 2 ** 32 - 1 && String(index) === lastKey) {
+        if (!canSplice(current, index)) return false;
+        Array.prototype.splice.call(current, index, 1);
+        return true;
+      }
+    }
+    return Reflect.deleteProperty(current, lastKey);
+  } catch {
+    return false;
   }
 }

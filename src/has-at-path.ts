@@ -1,36 +1,35 @@
+import { isUndef } from "@fimbul-works/hvat";
+import { createSeparator, dotSeparator } from "./separator.js";
 import type { Container, PathSeparatorFunction } from "./types.js";
 import { isNested } from "./util.js";
-import { dotSeparator } from "./separator.js";
 
 /**
- * Checks if a key exists in an object or array.
+ * Check whether a runtime path resolves to a value other than undefined.
  *
- * @template {Container} T - Type of object or array
- * @template {keyof T & string} K - Key indexing T
+ * Accepts arbitrary string paths and parser callbacks. Null counts as present;
+ * missing keys and non-traversable ancestors return false. Inherited properties
+ * are included. This boolean check does not narrow the input's static type.
  *
- * @param {T} input - The object or array to check
- * @param {string} path - The path using the configured separator notation
- * @param {PathSeparatorFunction} [separator=dotSeparator] - Function that splits the path into individual keys (default: dotSeparator)
- * @returns {boolean} `true` if the key exists, `false` otherwise.
+ * @param input - Object or array to inspect without mutation.
+ * @param path - Runtime path to check.
+ * @param separator - Parser for the path; defaults to {@link dotSeparator}.
+ * @returns True when the path resolves to a value other than undefined.
+ * @example
+ * ```ts
+ * hasAtPath({ user: { name: "Odin" } }, "user.name"); // true
+ * hasAtPath({ user: {} }, "user.name"); // false
+ * ```
  */
-export function hasAtPath<T extends Container = Container, K extends keyof T & string = keyof T & string>(
-  input: T,
-  path: string,
-  separator: PathSeparatorFunction = dotSeparator,
-): boolean {
-  const pathKeys = separator(path) as K[];
-  let current = input;
+export function hasAtPath(input: Container, path: string, separator: string = dotSeparator): boolean {
+  const parse = createSeparator(separator);
 
-  for (const key of pathKeys) {
+  let current: unknown = input;
+  for (const key of parse(path)) {
     if (!isNested(current) || !(key in current)) {
       return false;
     }
-    current = current[key] as T;
+    current = current[key];
   }
 
-  if (current === undefined) {
-    return false;
-  }
-
-  return true;
+  return !isUndef(current);
 }

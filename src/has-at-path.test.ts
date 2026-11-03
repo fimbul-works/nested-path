@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { hasAtPath } from "./has-at-path";
 
-const slashSeparator = (path: string) => path.split("/");
+import { slashSeparator } from "./separator";
 
 describe("hasAtPath", () => {
   const testObj = {
