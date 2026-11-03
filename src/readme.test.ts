@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import ts from "typescript";
 import { describe, expect, it } from "vitest";
 import * as api from "./index.js";
+import { clearPathSeparators } from "./separator.js";
 
 // Trailing comments declare an expected type, a runtime value, or "Compile error".
 // Snippets can reuse earlier variable declarations, as the README's error examples do.
@@ -223,7 +224,7 @@ describe("README TypeScript examples", () => {
       execute(load, {});
       for (const hook of hooks) hook();
     } finally {
-      api.clearPathSeparators();
+      clearPathSeparators();
     }
   });
 });

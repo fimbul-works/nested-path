@@ -35,5 +35,6 @@ export function canSplice(array: unknown[], index: number): boolean {
       }
     }
   }
+  
   return true;
 }

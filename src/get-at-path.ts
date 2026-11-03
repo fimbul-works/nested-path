@@ -42,7 +42,7 @@ export function getAtPath<T extends Container, const P extends string, const D e
  * @param input - Object or array to read without mutation.
  * @param path - Checked path using dot notation.
  * @param defaultValue - Value returned for a missing or undefined result; null is retained.
- * @param separator - Omit or pass undefined to use the default dot separator.
+ * @param separator - Nonempty literal string delimiter. (Default: {@link dotSeparator})
  * @returns The inferred path value, with possible undefined replaced by the fallback type.
  * @throws {TypeError} If the separator is not a nonempty string.
  */
@@ -60,7 +60,7 @@ export function getAtPath<T extends Container, const P extends string, F>(
  * @param input - Object or array to read without mutation.
  * @param path - Checked path using dot notation.
  * @param defaultValue - Omit or pass undefined to read without a fallback.
- * @param separator - Omit or pass undefined to use the default dot separator.
+ * @param separator - Nonempty literal string delimiter. (Default: {@link dotSeparator})
  * @returns The inferred path value, including undefined when traversal can fail.
  */
 export function getAtPath<T extends Container, const P extends string>(

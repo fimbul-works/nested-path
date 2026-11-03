@@ -1,6 +1,7 @@
 import { describe, expect, expectTypeOf, it } from "vitest";
 import { createApplicationConfig, type ApplicationConfig } from "../examples/config-fixture.js";
-import { clearPathSeparators, deleteAtPath, getAtPath, hasAtPath, setAtPath } from "./index.js";
+import { deleteAtPath, getAtPath, hasAtPath, setAtPath } from "./index.js";
+import { clearPathSeparators } from "./separator.js";
 
 describe("realistic application configuration", () => {
   it("infers deeply nested arrays, dictionaries, tuples, and nullable branches", () => {

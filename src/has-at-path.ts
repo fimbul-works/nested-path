@@ -12,7 +12,7 @@ import { isNested } from "./util.js";
  *
  * @param input - Object or array to inspect without mutation.
  * @param path - Runtime path to check.
- * @param separator - Parser for the path; defaults to {@link dotSeparator}.
+ * @param separator - Nonempty literal string delimiter. (Default: {@link dotSeparator})
  * @returns True when the path resolves to a value other than undefined.
  * @example
  * ```ts

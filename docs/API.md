@@ -8,15 +8,15 @@
 type CheckedPath<T, P, D> = string extends P ? never : [LiteralDelimiter<D>] extends [never] ? never : [ValidPath<T, P, D>] extends [true] ? unknown : never;
 ```
 
-Validate the supplied path without imposing an autocomplete depth limit.
+Return unknown for a valid literal path, or never for an invalid path or delimiter.
 
 #### Type Parameters
 
-| Type Parameter | Default type |
-| ------ | ------ |
-| <a id="type-parameter-t"></a> `T` | - |
-| <a id="type-parameter-p"></a> `P` *extends* `string` | - |
-| <a id="type-parameter-d"></a> `D` *extends* `string` | `"."` |
+| Type Parameter | Default type | Description |
+| ------ | ------ | ------ |
+| <a id="type-parameter-t"></a> `T` | - | Root type against which the path is checked. |
+| <a id="type-parameter-p"></a> `P` *extends* `string` | - | Candidate literal path or union of literal paths. |
+| <a id="type-parameter-d"></a> `D` *extends* `string` | `"."` | Known nonempty literal delimiter (defaults to dot). |
 
 ***
 
@@ -36,15 +36,15 @@ An object or array that can contain nested data, including readonly inputs.
 type DeletablePath<T, P, D> = CanDelete<T, P, D> extends true ? unknown : never;
 ```
 
-Only optional properties and mutable, non-tuple array indices can be deleted.
+Allow mutable optional properties, dictionary entries, and ordinary array indices to be deleted.
 
 #### Type Parameters
 
-| Type Parameter | Default type |
-| ------ | ------ |
-| <a id="type-parameter-t-1"></a> `T` | - |
-| <a id="type-parameter-p-1"></a> `P` *extends* `string` | - |
-| <a id="type-parameter-d-1"></a> `D` *extends* `string` | `"."` |
+| Type Parameter | Default type | Description |
+| ------ | ------ | ------ |
+| <a id="type-parameter-t-1"></a> `T` | - | Root type containing the deletion target. |
+| <a id="type-parameter-p-1"></a> `P` *extends* `string` | - | Literal path or union of possible deletion paths. |
+| <a id="type-parameter-d-1"></a> `D` *extends* `string` | `"."` | String delimiter between path segments (defaults to dot). |
 
 ***
 
@@ -54,13 +54,13 @@ Only optional properties and mutable, non-tuple array indices can be deleted.
 type LiteralDelimiter<D> = true extends IsUnion<D> ? never : [D] extends [""] ? never : IsLiteralString<D> extends true ? D : never;
 ```
 
-Only a single, nonempty literal delimiter has a statically known grammar.
+Keep a single nonempty literal delimiter, or return never if its grammar is unknown.
 
 #### Type Parameters
 
-| Type Parameter |
-| ------ |
-| <a id="type-parameter-d-2"></a> `D` *extends* `string` |
+| Type Parameter | Description |
+| ------ | ------ |
+| <a id="type-parameter-d-2"></a> `D` *extends* `string` | Candidate string delimiter type. |
 
 ***
 
@@ -72,15 +72,15 @@ type PathArgument<T, P, D> = P & (
   | NoInfer<[LiteralDelimiter<D>] extends [never] ? never : Completions<T, D>>);
 ```
 
-Finite suggestions plus validation of deeper paths and dictionary/array indices.
+Combine literal path validation with finite editor suggestions.
 
 #### Type Parameters
 
-| Type Parameter | Default type |
-| ------ | ------ |
-| <a id="type-parameter-t-2"></a> `T` | - |
-| <a id="type-parameter-p-2"></a> `P` *extends* `string` | - |
-| <a id="type-parameter-d-3"></a> `D` *extends* `string` | `"."` |
+| Type Parameter | Default type | Description |
+| ------ | ------ | ------ |
+| <a id="type-parameter-t-2"></a> `T` | - | Root type against which the path is checked. |
+| <a id="type-parameter-p-2"></a> `P` *extends* `string` | - | Inferred literal path supplied by the caller. |
+| <a id="type-parameter-d-3"></a> `D` *extends* `string` | `"."` | Known nonempty literal delimiter (defaults to dot). |
 
 ***
 
@@ -90,15 +90,15 @@ Finite suggestions plus validation of deeper paths and dictionary/array indices.
 type Paths<T, D, Depth> = string extends D ? never : D extends "" ? never : SuggestedPaths<T, D, Depth>;
 ```
 
-Path suggestions are bounded to keep editor work predictable on recursive schemas.
+Generate bounded path suggestions to keep editor work predictable on recursive schemas.
 
 #### Type Parameters
 
-| Type Parameter | Default type |
-| ------ | ------ |
-| <a id="type-parameter-t-3"></a> `T` | - |
-| <a id="type-parameter-d-4"></a> `D` *extends* `string` | `"."` |
-| <a id="type-parameter-depth"></a> `Depth` *extends* `number` | `2` |
+| Type Parameter | Default type | Description |
+| ------ | ------ | ------ |
+| <a id="type-parameter-t-3"></a> `T` | - | Root type whose paths should be suggested. |
+| <a id="type-parameter-d-4"></a> `D` *extends* `string` | `"."` | String delimiter between segments (defaults to dot). |
+| <a id="type-parameter-depth"></a> `Depth` *extends* `number` | `2` | Maximum number of path segments to suggest (defaults to 2). |
 
 ***
 
@@ -108,13 +108,13 @@ Path suggestions are bounded to keep editor work predictable on recursive schema
 type PathSeparator<D> = D;
 ```
 
-String delimiter; checked paths require one nonempty literal string.
+Represent a string delimiter while preserving an optional literal type.
 
 #### Type Parameters
 
-| Type Parameter | Default type |
-| ------ | ------ |
-| <a id="type-parameter-d-5"></a> `D` *extends* `string` | `string` |
+| Type Parameter | Default type | Description |
+| ------ | ------ | ------ |
+| <a id="type-parameter-d-5"></a> `D` *extends* `string` | `string` | Delimiter string type (defaults to string). |
 
 ***
 
@@ -124,7 +124,7 @@ String delimiter; checked paths require one nonempty literal string.
 type PathSeparatorFunction = (path) => string[];
 ```
 
-Callable parser shape used by the internal delimiter cache.
+Describe the callable parser stored in the internal delimiter cache.
 
 #### Parameters
 
@@ -144,15 +144,15 @@ Callable parser shape used by the internal delimiter cache.
 type PathValue<T, P, D> = P extends `${infer Head}${D}${infer Rest}` ? PathValue<ReadKey<T, Head>, Rest, D> : ReadKey<T, P>;
 ```
 
-Resolve a literal path, retaining absence from optional ancestors and arrays.
+Resolve a literal path while retaining possible absence from ancestors and array indices.
 
 #### Type Parameters
 
-| Type Parameter | Default type |
-| ------ | ------ |
-| <a id="type-parameter-t-4"></a> `T` | - |
-| <a id="type-parameter-p-3"></a> `P` *extends* `string` | - |
-| <a id="type-parameter-d-6"></a> `D` *extends* `string` | `"."` |
+| Type Parameter | Default type | Description |
+| ------ | ------ | ------ |
+| <a id="type-parameter-t-4"></a> `T` | - | Root type to traverse. |
+| <a id="type-parameter-p-3"></a> `P` *extends* `string` | - | Literal path whose value should be resolved. |
+| <a id="type-parameter-d-6"></a> `D` *extends* `string` | `"."` | String delimiter between path segments (defaults to dot). |
 
 ***
 
@@ -162,14 +162,14 @@ Resolve a literal path, retaining absence from optional ancestors and arrays.
 type WithDefault<V, F> = Exclude<V, undefined> | undefined extends V ? F : never;
 ```
 
-A fallback replaces undefined, while null remains a value.
+Replace possible undefined with a fallback type while retaining null and other values.
 
 #### Type Parameters
 
-| Type Parameter |
-| ------ |
-| <a id="type-parameter-v"></a> `V` |
-| <a id="type-parameter-f"></a> `F` |
+| Type Parameter | Description |
+| ------ | ------ |
+| <a id="type-parameter-v"></a> `V` | Resolved value type before applying a fallback. |
+| <a id="type-parameter-f"></a> `F` | Fallback type used when the value can be undefined. |
 
 ***
 
@@ -179,15 +179,15 @@ A fallback replaces undefined, while null remains a value.
 type WriteValue<T, P, D> = [NonNullable<T>] extends [never] ? never : WriteFunctions<NonNullable<T>, P, D> extends (value) => void ? V : never;
 ```
 
-A write must be valid for every possible input variant and supplied path.
+Resolve values assignable to every possible input variant and path destination.
 
 #### Type Parameters
 
-| Type Parameter | Default type |
-| ------ | ------ |
-| <a id="type-parameter-t-5"></a> `T` | - |
-| <a id="type-parameter-p-4"></a> `P` *extends* `string` | - |
-| <a id="type-parameter-d-7"></a> `D` *extends* `string` | `"."` |
+| Type Parameter | Default type | Description |
+| ------ | ------ | ------ |
+| <a id="type-parameter-t-5"></a> `T` | - | Root type or union of possible input types. |
+| <a id="type-parameter-p-4"></a> `P` *extends* `string` | - | Literal path or union of possible destination paths. |
+| <a id="type-parameter-d-7"></a> `D` *extends* `string` | `"."` | String delimiter between path segments (defaults to dot). |
 
 ## Variables
 
@@ -211,35 +211,14 @@ Literal slash delimiter.
 
 ## Functions
 
-### clearPathSeparators()
-
-```ts
-function clearPathSeparators(): void;
-```
-
-**`Internal`**
-
-Clear the cached path parsers, primarily to isolate tests.
-
-Future operations recreate parsers lazily. Existing parser references and
-the exported delimiter constants remain usable.
-
-#### Returns
-
-`void`
-
-Nothing; all entries are removed from the internal cache.
-
-***
-
 ### deleteAtPath()
 
 #### Call Signature
 
 ```ts
 function deleteAtPath<T, P, D>(
-   input,
-   path,
+   input, 
+   path, 
    separator
 ): boolean;
 ```
@@ -266,7 +245,7 @@ return false without shifting ordinary arrays.
 | ------ | ------ | ------ |
 | `input` | `T` | Object or array to mutate. |
 | `path` | [`PathArgument`](#pathargument)\<`NoInfer`\<`T`\>, `P`, `NoInfer`\<`D`\>\> & `NoInfer`\<[`DeletablePath`](#deletablepath)\<`T`, `P`, `D`\>\> | Checked deletable path interpreted using the supplied string delimiter. |
-| `separator` | `D` & [`LiteralDelimiter`](#literaldelimiter)\<`NoInfer`\<`D`\>\> | Nonempty literal string delimiter, such as "/" or "::". |
+| `separator` | `D` & [`LiteralDelimiter`](#literaldelimiter)\<`NoInfer`\<`D`\>\> | Nonempty literal string delimiter. (Default: [dotSeparator](#dotseparator)) |
 
 ##### Returns
 
@@ -282,8 +261,8 @@ If the separator is not a nonempty string.
 
 ```ts
 function deleteAtPath<T, P>(
-   input,
-   path,
+   input, 
+   path, 
    separator?
 ): boolean;
 ```
@@ -303,7 +282,7 @@ Delete a mutable optional property or splice an ordinary array at a dot-separate
 | ------ | ------ | ------ |
 | `input` | `T` | Object or array to mutate. |
 | `path` | [`PathArgument`](#pathargument)\<`NoInfer`\<`T`\>, `P`\> & `NoInfer`\<[`DeletablePath`](#deletablepath)\<`T`, `P`\>\> | Checked deletable path using dot notation. |
-| `separator?` | `undefined` | Omit or pass undefined to use the default dot separator. |
+| `separator?` | `undefined` | Nonempty literal string delimiter. (Default: [dotSeparator](#dotseparator)) |
 
 ##### Returns
 
@@ -323,9 +302,9 @@ If the separator is not a nonempty string.
 
 ```ts
 function getAtPath<T, P, D, F>(
-   input,
-   path,
-   defaultValue,
+   input, 
+   path, 
+   defaultValue, 
    separator
 ): WithDefault<PathValue<T, P, D>, F>;
 ```
@@ -375,9 +354,9 @@ getAtPath(input, "user/name", undefined, slashSeparator); // string
 
 ```ts
 function getAtPath<T, P, F>(
-   input,
-   path,
-   defaultValue,
+   input, 
+   path, 
+   defaultValue, 
    separator?
 ): WithDefault<PathValue<T, P>, F>;
 ```
@@ -399,7 +378,7 @@ Retrieve a value at a checked dot-separated path with a fallback.
 | `input` | `T` | Object or array to read without mutation. |
 | `path` | [`PathArgument`](#pathargument)\<`NoInfer`\<`T`\>, `P`\> | Checked path using dot notation. |
 | `defaultValue` | `F` | Value returned for a missing or undefined result; null is retained. |
-| `separator?` | `undefined` | Omit or pass undefined to use the default dot separator. |
+| `separator?` | `undefined` | Nonempty literal string delimiter. (Default: [dotSeparator](#dotseparator)) |
 
 ##### Returns
 
@@ -415,9 +394,9 @@ If the separator is not a nonempty string.
 
 ```ts
 function getAtPath<T, P>(
-   input,
-   path,
-   defaultValue?,
+   input, 
+   path, 
+   defaultValue?, 
    separator?
 ): PathValue<T, P>;
 ```
@@ -438,7 +417,7 @@ Retrieve a value at a checked dot-separated path without a fallback.
 | `input` | `T` | Object or array to read without mutation. |
 | `path` | [`PathArgument`](#pathargument)\<`NoInfer`\<`T`\>, `P`\> | Checked path using dot notation. |
 | `defaultValue?` | `undefined` | Omit or pass undefined to read without a fallback. |
-| `separator?` | `undefined` | Omit or pass undefined to use the default dot separator. |
+| `separator?` | `undefined` | Nonempty literal string delimiter. (Default: [dotSeparator](#dotseparator)) |
 
 ##### Returns
 
@@ -452,8 +431,8 @@ The inferred path value, including undefined when traversal can fail.
 
 ```ts
 function hasAtPath(
-   input,
-   path,
+   input, 
+   path, 
    separator?
 ): boolean;
 ```
@@ -470,7 +449,7 @@ are included. This boolean check does not narrow the input's static type.
 | ------ | ------ | ------ | ------ |
 | `input` | `object` | `undefined` | Object or array to inspect without mutation. |
 | `path` | `string` | `undefined` | Runtime path to check. |
-| `separator?` | `string` | `dotSeparator` | Parser for the path; defaults to [dotSeparator](#dotseparator). |
+| `separator?` | `string` | `dotSeparator` | Nonempty literal string delimiter. (Default: [dotSeparator](#dotseparator)) |
 
 #### Returns
 
@@ -493,9 +472,9 @@ hasAtPath({ user: {} }, "user.name"); // false
 
 ```ts
 function setAtPath<T, P, D>(
-   input,
-   path,
-   value,
+   input, 
+   path, 
+   value, 
    separator
 ): boolean;
 ```
@@ -521,7 +500,7 @@ Intermediate containers must already exist at runtime.
 | `input` | `T` | Object or array to mutate. |
 | `path` | [`PathArgument`](#pathargument)\<`NoInfer`\<`T`\>, `P`, `NoInfer`\<`D`\>\> | Checked path interpreted using the supplied string delimiter. |
 | `value` | `NoInfer`\<[`WriteValue`](#writevalue)\<`T`, `P`, `D`\>\> | Value assignable to every possible destination of the path. |
-| `separator` | `D` & [`LiteralDelimiter`](#literaldelimiter)\<`NoInfer`\<`D`\>\> | Nonempty literal string delimiter, such as "/" or "::". |
+| `separator` | `D` & [`LiteralDelimiter`](#literaldelimiter)\<`NoInfer`\<`D`\>\> | Nonempty literal string delimiter. (Default: [dotSeparator](#dotseparator)) |
 
 ##### Returns
 
@@ -544,9 +523,9 @@ setAtPath(input, "user/name", "Thor", slashSeparator);
 
 ```ts
 function setAtPath<T, P>(
-   input,
-   path,
-   value,
+   input, 
+   path, 
+   value, 
    separator?
 ): boolean;
 ```
@@ -571,7 +550,7 @@ Intermediate containers must already exist at runtime.
 | `input` | `T` | Object or array to mutate. |
 | `path` | [`PathArgument`](#pathargument)\<`NoInfer`\<`T`\>, `P`\> | Checked path interpreted using the supplied string delimiter. |
 | `value` | `NoInfer`\<[`WriteValue`](#writevalue)\<`T`, `P`\>\> | Value assignable to every possible destination of the path. |
-| `separator?` | `undefined` | Nonempty literal string delimiter, such as "/" or "::". |
+| `separator?` | `undefined` | Nonempty literal string delimiter. (Default: [dotSeparator](#dotseparator)) |
 
 ##### Returns
 

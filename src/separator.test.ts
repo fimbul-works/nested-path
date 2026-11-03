@@ -1,7 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as api from "./index.js";
 import {
-  clearPathSeparators,
   deleteAtPath,
   dotSeparator,
   getAtPath,
@@ -9,7 +8,7 @@ import {
   setAtPath,
   slashSeparator,
 } from "./index.js";
-import { createSeparator } from "./separator.js";
+import { clearPathSeparators, createSeparator } from "./separator.js";
 
 // Check JavaScript inputs as well as the literal delimiter types.
 const getUnchecked = getAtPath as (input: object, path: string, fallback: unknown, separator: unknown) => unknown;

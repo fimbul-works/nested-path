@@ -16,7 +16,7 @@ import { isNested } from "./util.js";
  * @param input - Object or array to mutate.
  * @param path - Checked path interpreted using the supplied string delimiter.
  * @param value - Value assignable to every possible destination of the path.
- * @param separator - Nonempty literal string delimiter, such as "/" or "::".
+ * @param separator - Nonempty literal string delimiter. (Default: {@link dotSeparator})
  * @returns True if the mutation succeeds; false if the path cannot be traversed or the mutation fails.
  * @throws {TypeError} If the separator is not a nonempty string.
  * @example

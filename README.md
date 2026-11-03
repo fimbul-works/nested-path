@@ -108,7 +108,6 @@ An empty path addresses the key `''`; it does not mean the root object. Repeated
 | `setAtPath(input, path, value, separator?)` | `boolean` | Assigns a compatible value in place; returns whether assignment succeeded. |
 | `deleteAtPath(input, path, separator?)` | `boolean` | Deletes an optional property or dictionary entry, or removes an ordinary array element and shifts later elements left. |
 | `hasAtPath(input, path, separator?)` | `boolean` | Accepts runtime string paths; checks for a value other than undefined without narrowing the input's type. |
-| `clearPathSeparators()` | `void` | Empties the internal parser cache, primarily for test isolation. |
 
 All operations use dot notation when the separator is omitted. See the [generated API documentation](docs/README.md) for signatures and examples.
 
@@ -155,19 +154,6 @@ Invalid separators always throw a `TypeError`, including in production, Vitest, 
 
 The array preflight prevents ordinary descriptor-related partial splice failures. Arbitrary side effects from proxies, custom constructors, or accessors elsewhere in an object graph are not transactional and cannot be rolled back.
 
-## Parser cache and tests
-
-`clearPathSeparators()` removes every cached parser. Subsequent operations recreate parsers lazily, including the default dot parser. Clearing the cache does not alter input data, invalidate the exported delimiter constants, or affect parser references already held internally.
-
-```ts
-import { afterEach } from 'vitest';
-import { clearPathSeparators } from '@fimbul-works/nested-path';
-
-afterEach(clearPathSeparators);
-```
-
-The map retains one function for each distinct delimiter until cleared. It is intended for the small set of delimiters used by an application.
-
 ## Exported types
 
 The primary utility types are:
@@ -201,16 +187,18 @@ The README examples are extracted and tested directly by [src/readme.test.ts](sr
 
 Integration tests exercise all four operations on fresh fixtures using dot, slash, and multi-character delimiters. Editor tests use TypeScript's language service to check completions and hover types on the same fixture. They verify the underlying TypeScript behavior, while VSCode extensions and editor settings may affect presentation. Automatic path suggestions remain bounded to two levels; supplied deeper paths are checked and inferred.
 
-## Development
+---
 
-```sh
-pnpm typecheck          # Source, type regressions, and examples
-pnpm test:run           # Compile-time checks, runtime integration, and editor-service tests
-pnpm typecheck:examples # Check the VSCode playground
-pnpm test               # Compile-time checks, followed by tests in watch mode
-pnpm build              # ESM, CommonJS, declarations, and API documentation
-```
+## API Reference
+
+For complete API documentation with all methods, parameters, and examples, see [API documentation](docs/API.md).
+
+---
 
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+---
+
+Built with ⚡ by [FimbulWorks](https://github.com/fimbul-works)

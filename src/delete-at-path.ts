@@ -17,7 +17,7 @@ import { canSplice, isNested } from "./util.js";
  * @typeParam D - Literal string delimiter used to interpret the path.
  * @param input - Object or array to mutate.
  * @param path - Checked deletable path interpreted using the supplied string delimiter.
- * @param separator - Nonempty literal string delimiter, such as "/" or "::".
+ * @param separator - Nonempty literal string delimiter. (Default: {@link dotSeparator})
  * @returns `true` if the mutation succeeds; `false` if the path cannot be traversed or the mutation fails.
  * @throws {TypeError} If the separator is not a nonempty string.
  */
@@ -33,7 +33,7 @@ export function deleteAtPath<T extends Container, const P extends string, const 
  * @typeParam P - Literal dot-separated deletable path.
  * @param input - Object or array to mutate.
  * @param path - Checked deletable path using dot notation.
- * @param separator - Omit or pass undefined to use the default dot separator.
+ * @param separator - Nonempty literal string delimiter. (Default: {@link dotSeparator})
  * @returns `true` if the mutation succeeds; `false` if the path cannot be traversed or the mutation fails.
  * @throws {TypeError} If the separator is not a nonempty string.
  */
